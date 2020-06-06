@@ -13,6 +13,7 @@ import com.lude.sisempresa.domain.Cidade;
 import com.lude.sisempresa.domain.Cliente;
 import com.lude.sisempresa.domain.Endereco;
 import com.lude.sisempresa.domain.Estado;
+import com.lude.sisempresa.domain.ItemPedido;
 import com.lude.sisempresa.domain.Pagamento;
 import com.lude.sisempresa.domain.PagamentoComBoleto;
 import com.lude.sisempresa.domain.PagamentoComCartao;
@@ -25,6 +26,7 @@ import com.lude.sisempresa.repositories.CidadeRepository;
 import com.lude.sisempresa.repositories.ClienteRepository;
 import com.lude.sisempresa.repositories.EnderecoRepository;
 import com.lude.sisempresa.repositories.EstadoRepository;
+import com.lude.sisempresa.repositories.ItemPedidoRepository;
 import com.lude.sisempresa.repositories.PagamentoRepository;
 import com.lude.sisempresa.repositories.PedidoRepository;
 import com.lude.sisempresa.repositories.ProdutoRepository;
@@ -52,6 +54,8 @@ public class SisempresaApplication implements CommandLineRunner {
 	private PedidoRepository pedidoRepository;
 	@Autowired
 	private PagamentoRepository pagamentoRepository;
+	@Autowired
+	private ItemPedidoRepository itemPedidoRepository;
 
 	@Override
 	public void run(String... args) throws Exception {
@@ -118,6 +122,21 @@ public class SisempresaApplication implements CommandLineRunner {
 		
 		pedidoRepository.saveAll(Arrays.asList(ped1, ped2));
 		pagamentoRepository.saveAll(Arrays.asList(pagto1, pagto2));
+		// ------------------------------------------------------//
+		
+		// ------------------------------------------------------//
+		ItemPedido ip1 = new ItemPedido(ped1, p1, 0.00, 1, 2000.00);
+		ItemPedido ip2 = new ItemPedido(ped1, p3, 0.00, 2, 80.00);
+		ItemPedido ip3 = new ItemPedido(ped2, p2, 100.00, 1, 800.00);
+		
+		ped1.getItens().addAll(Arrays.asList(ip1, ip2));
+		ped2.getItens().add(ip3);
+		
+		p1.getItens().add(ip1);
+		p2.getItens().add(ip3);
+		p3.getItens().add(ip2);
+		
+		itemPedidoRepository.saveAll(Arrays.asList(ip1, ip2, ip3));
 		
 		// ------------------------------------------------------//
 
