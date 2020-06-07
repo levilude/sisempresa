@@ -9,10 +9,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.lude.sisempresa.domain.Cidade;
 import com.lude.sisempresa.domain.Cliente;
+import com.lude.sisempresa.domain.Endereco;
+import com.lude.sisempresa.domain.enums.TipoCliente;
 import com.lude.sisempresa.dto.ClienteDTO;
+import com.lude.sisempresa.dto.ClienteNewDTO;
 import com.lude.sisempresa.repositories.ClienteRepository;
+import com.lude.sisempresa.repositories.EnderecoRepository;
 import com.lude.sisempresa.services.exceptions.DataIntegrityException;
 import com.lude.sisempresa.services.exceptions.ObjectNotFoundException;
 
@@ -22,6 +28,9 @@ public class ClienteService {
 	// Instanciar objeto por injeção de dependencia. O spring faz isso automático
 	@Autowired
 	private ClienteRepository repo;
+	
+	@Autowired
+	private EnderecoRepository enderecoRepository;
 
 	public Cliente find(Integer id) {
 		Optional<Cliente> obj = repo.findById(id);
@@ -29,17 +38,26 @@ public class ClienteService {
 				"Objeto não encontrado! Id: " + id + ", Tipo: " + Cliente.class.getName()));
 	}
 
+	@Transactional
+	public Cliente insert(Cliente obj) {
+		obj.setId(null);
+		obj = repo.save(obj);
+		enderecoRepository.saveAll(obj.getEnderecos());
+		return obj;
+
+	}
+
 	public Cliente update(Cliente obj) {
 		Cliente newObj = find(obj.getId());
 		updateData(newObj, obj);
 		return repo.save(newObj);
 	}
-	
+
 	private void updateData(Cliente newObj, Cliente obj) {
 		newObj.setNome(obj.getNome());
 		newObj.setEmail(obj.getEmail());
 	}
-	
+
 	public void delete(Integer id) {
 		find(id);
 		try {
@@ -47,23 +65,41 @@ public class ClienteService {
 		} catch (DataIntegrityViolationException e) {
 			throw new DataIntegrityException("Não é possível excluir porque há entidades relacionadas");
 		}
-		
+
 	}
-	
+
 	public List<Cliente> findAll() {
 		return repo.findAll();
 	}
-	
-	//Buscar categorias com paginação
-	public Page<Cliente> findPage(Integer page, Integer linesPerPage, String orderBy, String direction){
+
+	// Buscar categorias com paginação
+	public Page<Cliente> findPage(Integer page, Integer linesPerPage, String orderBy, String direction) {
 		PageRequest pageRequest = PageRequest.of(page, linesPerPage, Direction.valueOf(direction), orderBy);
 		return repo.findAll(pageRequest);
-		
+
 	}
-	
-	//Método auxiliar para transformar um DTO em uma Entidade
-	//Instancia uma Cliente através de um DTO
+
+	// Método auxiliar para transformar um DTO em uma Entidade
+	// Instancia uma Cliente através de um DTO
 	public Cliente fromDTO(ClienteDTO objDto) {
 		return new Cliente(objDto.getId(), objDto.getNome(), objDto.getEmail(), null, null);
+	}
+
+	public Cliente fromDTO(ClienteNewDTO objDto) {
+		Cliente cli = new Cliente(null, objDto.getNome(), objDto.getEmail(), objDto.getCpfOuCnpj(),
+				TipoCliente.toEnum(objDto.getTipo()));
+		Cidade cid = new Cidade(objDto.getCidadeId(), null, null);
+		Endereco end = new Endereco(null, objDto.getLogradouro(), objDto.getNumero(), objDto.getComplemento(),
+				objDto.getBairro(), objDto.getCep(), cli, cid);
+		cli.getEnderecos().add(end);
+		cli.getTelefones().add(objDto.getTelefone1());
+		if (objDto.getTelefone2() != null) {
+			cli.getTelefones().add(objDto.getTelefone2());
+		}
+		if (objDto.getTelefone3() != null) {
+			cli.getTelefones().add(objDto.getTelefone3());
+		}
+		return cli;
+
 	}
 }
