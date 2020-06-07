@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import com.lude.sisempresa.domain.Categoria;
+import com.lude.sisempresa.dto.CategoriaDTO;
 import com.lude.sisempresa.repositories.CategoriaRepository;
 import com.lude.sisempresa.services.exceptions.DataIntegrityException;
 import com.lude.sisempresa.services.exceptions.ObjectNotFoundException;
@@ -57,6 +58,12 @@ public class CategoriaService {
 		PageRequest pageRequest = PageRequest.of(page, linesPerPage, Direction.valueOf(direction), orderBy);
 		return repo.findAll(pageRequest);
 		
+	}
+	
+	//Método auxiliar para transformar um DTO em uma Entidade
+	//Instancia uma Categoria através de um DTO
+	public Categoria fromDTO(CategoriaDTO objDto) {
+		return new Categoria(objDto.getId(), objDto.getNome());
 	}
 
 }
