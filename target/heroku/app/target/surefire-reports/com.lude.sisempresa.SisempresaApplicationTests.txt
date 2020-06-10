@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.lude.sisempresa.SisempresaApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 14.316 s - in com.lude.sisempresa.SisempresaApplicationTests
